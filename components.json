@@ -22,6 +22,6 @@
   "menuColor": "default",
   "menuAccent": "subtle",
   "registries": {
-    "@ovinisanches": "https://ovinisances.com/r/{name}.json"
+    "@ovinisanches": "https://ovinisanches.com/r/{name}.json"
   }
 }
