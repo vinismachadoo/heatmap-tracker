@@ -1,17 +1,15 @@
 "use client"
 
 import {
-  CalendarHeatmap,
-  CalendarHeatmapContainer,
-  CalendarHeatmapLegend,
+  HeatmapTracker,
+  HeatmapTrackerContainer,
+  HeatmapTrackerLegend,
 } from "@/registry/default/ui/heatmap-tracker"
 import { cn } from "@/lib/utils"
 
-const ExampleMood = ({
-  data,
-}: React.ComponentProps<typeof CalendarHeatmap>) => {
+const ExampleMood = ({ data }: React.ComponentProps<typeof HeatmapTracker>) => {
   return (
-    <CalendarHeatmapContainer
+    <HeatmapTrackerContainer
       lightColors={[
         "var(--color-red-500)",
         "var(--color-violet-500)",
@@ -37,9 +35,9 @@ const ExampleMood = ({
         ),
       }}
     >
-      <CalendarHeatmap data={data} />
-      <CalendarHeatmapLegend />
-    </CalendarHeatmapContainer>
+      <HeatmapTracker data={data} />
+      <HeatmapTrackerLegend />
+    </HeatmapTrackerContainer>
   )
 }
 
