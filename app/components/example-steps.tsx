@@ -5,11 +5,10 @@ import {
   CalendarHeatmapContainer,
   CalendarHeatmapLegend,
 } from "@/components/heatmap-tracker"
-import { generateContributions } from "@/lib/utils"
 
-const ExampleSteps = () => {
-  const data = generateContributions()
-
+const ExampleSteps = ({
+  data,
+}: React.ComponentProps<typeof CalendarHeatmap>) => {
   return (
     <CalendarHeatmapContainer
       lightColors={[

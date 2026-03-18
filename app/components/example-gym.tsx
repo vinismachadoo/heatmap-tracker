@@ -5,11 +5,9 @@ import {
   CalendarHeatmapContainer,
   CalendarHeatmapLegend,
 } from "@/components/heatmap-tracker"
-import { cn, generateContributions } from "@/lib/utils"
+import { cn } from "@/lib/utils"
 
-const ExampleGym = () => {
-  const data = generateContributions()
-
+const ExampleGym = ({ data }: React.ComponentProps<typeof CalendarHeatmap>) => {
   return (
     <CalendarHeatmapContainer
       className={cn(
