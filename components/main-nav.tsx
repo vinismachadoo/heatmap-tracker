@@ -1,12 +1,16 @@
 "use client"
 
 import ModeToggle from "@/components/mode-toggle"
+import { Button } from "@/components/ui/button"
 import { Grip } from "lucide-react"
 import { useTheme } from "next-themes"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { useHotkeys } from "react-hotkeys-hook"
 
 const MainNav = () => {
+  const pathname = usePathname()
+
   const { setTheme, resolvedTheme } = useTheme()
   useHotkeys("d", () => setTheme(resolvedTheme === "dark" ? "light" : "dark"))
 
@@ -18,6 +22,10 @@ const MainNav = () => {
             <Grip className="size-4" />
           </div>
         </Link>
+
+        <Button variant="ghost" data-active={pathname === "/create"} disabled>
+          <Link href="/create">Create</Link>
+        </Button>
       </div>
 
       <div className="flex items-center gap-x-2">

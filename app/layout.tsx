@@ -51,7 +51,7 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn(geistMono.variable, geistSans.variable, inter.variable)}
     >
-      <body className="group/body overscroll-none antialiased [--main-nav-height:calc(var(--spacing)*14)]">
+      <body className="group/body overscroll-none font-mono antialiased [--main-nav-height:calc(var(--spacing)*14)]">
         <TooltipProvider>
           <ThemeProvider>
             <div data-slot="layout" className="flex flex-col">
