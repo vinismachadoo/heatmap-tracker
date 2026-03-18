@@ -5,13 +5,18 @@ import {
   CalendarHeatmapContainer,
   CalendarHeatmapLegend,
 } from "@/components/heatmap-tracker"
-import { generateContributions } from "@/lib/utils"
+import { cn, generateContributions } from "@/lib/utils"
 
 const ExampleGym = () => {
   const data = generateContributions()
 
   return (
-    <CalendarHeatmapContainer className="[--level-0:var(--color-orange-100)] [--level-1:var(--color-orange-200)] [--level-2:var(--color-orange-400)] [--level-3:var(--color-orange-600)] [--level-4:var(--color-orange-800)]">
+    <CalendarHeatmapContainer
+      className={cn(
+        "[--level-0:var(--color-orange-200)] [--level-1:var(--color-orange-400)] [--level-2:var(--color-orange-600)] [--level-3:var(--color-orange-800)] [--level-4:var(--color-orange-900)]",
+        "dark:[--level-0:var(--color-orange-900)] dark:[--level-1:var(--color-orange-800)] dark:[--level-2:var(--color-orange-600)] dark:[--level-3:var(--color-orange-400)] dark:[--level-4:var(--color-orange-200)]"
+      )}
+    >
       <CalendarHeatmap
         data={data}
         classNames={{

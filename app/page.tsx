@@ -18,12 +18,12 @@ export default function Page() {
         <ExampleSteps />
       </div>
       <div className="flex flex-col gap-y-2">
-        <Label className="text-base font-medium">Mood Tracker</Label>
-        <ExampleMood />
-      </div>
-      <div className="flex flex-col gap-y-2">
         <Label className="text-base font-medium">Gym Checkins</Label>
         <ExampleGym />
+      </div>
+      <div className="flex flex-col gap-y-2">
+        <Label className="text-base font-medium">Mood Tracker</Label>
+        <ExampleMood />
       </div>
     </div>
   )

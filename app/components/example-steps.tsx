@@ -11,7 +11,22 @@ const ExampleSteps = () => {
   const data = generateContributions()
 
   return (
-    <CalendarHeatmapContainer className="[--level-0:var(--color-blue-100)] [--level-1:var(--color-blue-200)] [--level-2:var(--color-blue-400)] [--level-3:var(--color-blue-600)] [--level-4:var(--color-blue-800)]">
+    <CalendarHeatmapContainer
+      lightColors={[
+        "var(--color-blue-200)",
+        "var(--color-blue-400)",
+        "var(--color-blue-600)",
+        "var(--color-blue-800)",
+        "var(--color-blue-900)",
+      ]}
+      darkColors={[
+        "var(--color-blue-900)",
+        "var(--color-blue-800)",
+        "var(--color-blue-600)",
+        "var(--color-blue-400)",
+        "var(--color-blue-200)",
+      ]}
+    >
       <CalendarHeatmap
         data={data}
         classNames={{

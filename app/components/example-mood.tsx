@@ -11,7 +11,22 @@ const ExampleMood = () => {
   const data = generateContributions()
 
   return (
-    <CalendarHeatmapContainer className="[--level-0:var(--color-red-300)] [--level-1:var(--color-yellow-300)] [--level-2:var(--color-yellow-500)] [--level-3:var(--color-green-300)] [--level-4:var(--color-green-500)]">
+    <CalendarHeatmapContainer
+      lightColors={[
+        "var(--color-red-500)",
+        "var(--color-violet-500)",
+        "var(--color-teal-500)",
+        "var(--color-yellow-500)",
+        "var(--color-lime-500)",
+      ]}
+      darkColors={[
+        "var(--color-red-500)",
+        "var(--color-violet-500)",
+        "var(--color-teal-500)",
+        "var(--color-yellow-500)",
+        "var(--color-lime-500)",
+      ]}
+    >
       <CalendarHeatmap
         data={data}
         classNames={{

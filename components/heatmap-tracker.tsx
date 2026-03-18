@@ -43,8 +43,13 @@ export const useCalendarHeatmap = () => {
 const CalendarHeatmapContainer = ({
   children,
   className,
+  lightColors = [],
+  darkColors = [],
   ...props
-}: React.ComponentProps<"div">) => {
+}: React.ComponentProps<"div"> & {
+  lightColors?: string[]
+  darkColors?: string[]
+}) => {
   const [classNames, setClassNames] = React.useState<Record<string, string>>({})
   return (
     <CalendarHeatmapContext.Provider
@@ -54,16 +59,28 @@ const CalendarHeatmapContainer = ({
       }}
     >
       <div
-        className={cn(
-          "flex w-fit flex-col gap-y-4 overflow-x-scroll p-2 [--level-0:var(--color-neutral-100)] [--level-1:var(--color-lime-200)] [--level-2:var(--color-lime-400)] [--level-3:var(--color-lime-600)] [--level-4:var(--color-lime-800)]",
-          className
-        )}
         style={
           {
+            "--level-0-light": lightColors[0] ?? "var(--color-lime-200)",
+            "--level-1-light": lightColors[1] ?? "var(--color-lime-400)",
+            "--level-2-light": lightColors[2] ?? "var(--color-lime-600)",
+            "--level-3-light": lightColors[3] ?? "var(--color-lime-800)",
+            "--level-4-light": lightColors[4] ?? "var(--color-lime-900)",
+            "--level-0-dark": darkColors[0] ?? "var(--color-lime-900)",
+            "--level-1-dark": darkColors[1] ?? "var(--color-lime-800)",
+            "--level-2-dark": darkColors[2] ?? "var(--color-lime-600)",
+            "--level-3-dark": darkColors[3] ?? "var(--color-lime-400)",
+            "--level-4-dark": darkColors[4] ?? "var(--color-lime-200)",
             "--day-size": DAY_SIZE,
             "--day-margin": DAY_MARGIN,
           } as React.CSSProperties
         }
+        className={cn(
+          "flex w-fit flex-col gap-y-4 overflow-x-scroll p-2",
+          "[--level-0:var(--level-0-light)] [--level-1:var(--level-1-light)] [--level-2:var(--level-2-light)] [--level-3:var(--level-3-light)] [--level-4:var(--level-4-light)]",
+          "dark:[--level-0:var(--level-0-dark)] dark:[--level-1:var(--level-1-dark)] dark:[--level-2:var(--level-2-dark)] dark:[--level-3:var(--level-3-dark)] dark:[--level-4:var(--level-4-dark)]",
+          className
+        )}
         {...props}
       >
         {children}
@@ -90,7 +107,7 @@ const CalendarHeatmap = ({
   const formatCaption = (date: Date) =>
     date.toLocaleString(locale?.code, { month: "short" })
   const elevenMonthAgo = new Date(
-    new Date().setMonth(new Date().getMonth() - 11)
+    new Date().setMonth(new Date().getMonth() - 12)
   )
 
   const heatmapModify = () => {
@@ -112,6 +129,7 @@ const CalendarHeatmap = ({
         four.push(item.date)
       }
     }
+
     return {
       zero: zero,
       one: one,
@@ -131,19 +149,18 @@ const CalendarHeatmap = ({
 
   return (
     <Calendar
-      animate
       formatters={{ formatCaption }}
       locale={locale}
-      numberOfMonths={12}
+      numberOfMonths={13}
       defaultMonth={elevenMonthAgo}
       hideWeekdays
+      fixedWeeks
       className="w-fit items-center justify-center p-0"
       classNames={{
         ...classNames,
         root: cn("w-auto", classNames?.root),
         nav: cn("hidden", classNames?.nav),
-        caption: cn("text-xs", classNames?.caption),
-        caption_label: cn("font-normal", classNames?.caption_label),
+        caption_label: cn("text-xs font-normal", classNames?.caption_label),
         month: cn("ml-0 w-fit", classNames?.month),
         month_caption: cn("h-fit px-0", classNames?.month_caption),
         months: cn("w-fit gap-0", classNames?.months),
@@ -155,15 +172,14 @@ const CalendarHeatmap = ({
         ),
         day: cn(
           "m-(--day-margin) size-(--day-size) rounded-sm border border-border/20 bg-muted/50 text-xs text-transparent",
+          "data-[hidden=true]:hidden",
           classNames?.day
         ),
-        day_outside: cn(
-          "border border-transparent bg-transparent text-transparent",
-          classNames?.day_outside
-        ),
-        day_today: cn(
-          "border border-black text-transparent",
-          classNames?.day_today
+        outside: cn("text-xs text-transparent", classNames?.outside),
+        today: cn(
+          "m-(--day-margin) size-(--day-size) rounded-sm border border-border/20 bg-muted/50 text-xs text-transparent",
+          classNames?.day,
+          classNames?.today
         ),
       }}
       modifiers={heatmapModify()}
@@ -208,6 +224,10 @@ function CustomWeek({ week, data }: CustomWeekProps) {
   const thisMonth = displayMonth?.getMonth()
 
   const modifierClassNames = dayPickerProps.modifiersClassNames ?? {}
+  const allClassNames: Record<string, string> = {
+    ...classNames,
+    ...modifierClassNames,
+  }
 
   return (
     <tr
@@ -227,7 +247,7 @@ function CustomWeek({ week, data }: CustomWeekProps) {
         const modifiers = getModifiers(day)
         const modifierClasses = Object.entries(modifiers)
           .filter(([, v]) => v)
-          .map(([k]) => modifierClassNames[k])
+          .map(([k]) => allClassNames[k])
           .filter(Boolean)
           .join(" ")
         const dayClassName = cn(classNames?.day, modifierClasses)
@@ -240,6 +260,15 @@ function CustomWeek({ week, data }: CustomWeekProps) {
             (item) => item.date.toDateString() === day.date.toDateString()
           )?.level ?? 0
 
+        // Get the start of the week of the date exactly one year ago from today at 00:00:00:00
+        const oneYearAgoStartOfWeek = new Date(
+          new Date().setFullYear(new Date().getFullYear() - 1)
+        )
+        oneYearAgoStartOfWeek.setDate(
+          oneYearAgoStartOfWeek.getDate() - oneYearAgoStartOfWeek.getDay()
+        )
+        oneYearAgoStartOfWeek.setHours(0, 0, 0, 0)
+
         return (
           <Tooltip key={`${day.isoDate}_${day.displayMonthId}`}>
             <TooltipTrigger
@@ -251,6 +280,9 @@ function CustomWeek({ week, data }: CustomWeekProps) {
                   style={styles?.day}
                   role="gridcell"
                   data-level={level.toString()}
+                  data-hidden={
+                    day.date > new Date() || day.date < oneYearAgoStartOfWeek
+                  }
                 >
                   {formatters.formatDay(
                     day.date,
