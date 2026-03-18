@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils"
 import { Metadata } from "next"
 import { Geist, Geist_Mono, Inter } from "next/font/google"
 import "./globals.css"
+import MainNav from "@/components/main-nav"
 
 const inter = Inter({
   variable: "--font-inter",
@@ -50,9 +51,21 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn(geistMono.variable, geistSans.variable, inter.variable)}
     >
-      <body className="group/body overscroll-none antialiased">
+      <body className="group/body overscroll-none antialiased [--main-nav-height:calc(var(--spacing)*14)]">
         <TooltipProvider>
-          <ThemeProvider>{children}</ThemeProvider>
+          <ThemeProvider>
+            <div data-slot="layout" className="flex flex-col">
+              <header className="sticky top-0 z-50 w-full bg-background">
+                <div className="3xl:fixed:px-0">
+                  <div className="3xl:fixed:container flex h-(--main-nav-height) items-center">
+                    <MainNav />
+                  </div>
+                </div>
+              </header>
+
+              <main className="flex flex-1 flex-col">{children}</main>
+            </div>
+          </ThemeProvider>
         </TooltipProvider>
       </body>
     </html>

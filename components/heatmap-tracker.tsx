@@ -16,11 +16,15 @@ import {
   WeekNumber,
   type CalendarWeek,
 } from "react-day-picker"
+import { enUS } from "date-fns/locale"
 
 const DAY_SIZE = "calc(var(--spacing)*4.5)"
 const DAY_MARGIN = "2px"
 
-type CalendarHeatmapContextValue = object
+type CalendarHeatmapContextValue = {
+  _classNames: Record<string, string>
+  _setClassNames: React.Dispatch<React.SetStateAction<Record<string, string>>>
+}
 
 const CalendarHeatmapContext = React.createContext<
   CalendarHeatmapContextValue | undefined
@@ -41,17 +45,23 @@ const CalendarHeatmapContainer = ({
   className,
   ...props
 }: React.ComponentProps<"div">) => {
+  const [classNames, setClassNames] = React.useState<Record<string, string>>({})
   return (
-    <CalendarHeatmapContext.Provider value={{}}>
+    <CalendarHeatmapContext.Provider
+      value={{
+        _classNames: classNames,
+        _setClassNames: setClassNames,
+      }}
+    >
       <div
         className={cn(
-          "flex w-fit flex-col gap-y-4 overflow-x-scroll p-2 [--level-0:var(--color-neutral-100)] [--level-1:var(--color-lime-200)] [--level-2:var(--color-lime-400)] [--level-3:var(--color-lime-600)] [--level-4:var(--color-lime-800)] dark:[--level-0:var(--color-neutral-800)]",
+          "flex w-fit flex-col gap-y-4 overflow-x-scroll p-2 [--level-0:var(--color-neutral-100)] [--level-1:var(--color-lime-200)] [--level-2:var(--color-lime-400)] [--level-3:var(--color-lime-600)] [--level-4:var(--color-lime-800)]",
           className
         )}
         style={
           {
-            "--box-size": DAY_SIZE,
-            "--box-margin": DAY_MARGIN,
+            "--day-size": DAY_SIZE,
+            "--day-margin": DAY_MARGIN,
           } as React.CSSProperties
         }
         {...props}
@@ -65,26 +75,24 @@ const CalendarHeatmapContainer = ({
 export interface CalendarHeatmapData {
   date: Date
   count: number
-  intensity: number
+  level: number
 }
 
 const CalendarHeatmap = ({
   data,
-  locale,
+  locale = enUS,
   components,
+  classNames,
   ...props
 }: React.ComponentProps<typeof Calendar> & {
-  data: Array<{
-    date: Date
-    count: number
-    intensity: number
-  }>
+  data: Array<CalendarHeatmapData>
 }) => {
   const formatCaption = (date: Date) =>
     date.toLocaleString(locale?.code, { month: "short" })
   const elevenMonthAgo = new Date(
     new Date().setMonth(new Date().getMonth() - 11)
   )
+
   const heatmapModify = () => {
     const zero: Date[] = []
     const one: Date[] = []
@@ -92,15 +100,15 @@ const CalendarHeatmap = ({
     const three: Date[] = []
     const four: Date[] = []
     for (const item of data) {
-      if (item.intensity === 0) {
+      if (item.level === 0) {
         zero.push(item.date)
-      } else if (item.intensity === 1) {
+      } else if (item.level === 1) {
         one.push(item.date)
-      } else if (item.intensity === 2) {
+      } else if (item.level === 2) {
         two.push(item.date)
-      } else if (item.intensity === 3) {
+      } else if (item.level === 3) {
         three.push(item.date)
-      } else if (item.intensity === 4) {
+      } else if (item.level === 4) {
         four.push(item.date)
       }
     }
@@ -113,8 +121,17 @@ const CalendarHeatmap = ({
     }
   }
 
+  const { _setClassNames } = useCalendarHeatmap()
+
+  React.useEffect(() => {
+    _setClassNames({
+      ...classNames,
+    })
+  }, [])
+
   return (
     <Calendar
+      animate
       formatters={{ formatCaption }}
       locale={locale}
       numberOfMonths={12}
@@ -122,20 +139,32 @@ const CalendarHeatmap = ({
       hideWeekdays
       className="w-fit items-center justify-center p-0"
       classNames={{
-        root: "w-auto",
-        nav: "hidden",
-        caption: "text-xs",
-        caption_label: "font-normal",
-        month: "ml-0 w-fit",
-        month_caption: "h-fit px-0",
-        months: "gap-0 w-fit",
-        month_grid: "w-fit",
-        weeks: "flex w-fit",
-        week: "select-none flex mt-0 flex-col data-[duplicated-previous-month=true]:hidden",
-        day: "w-(--box-size) h-(--box-size) m-(--box-margin) bg-muted border border-border/20 rounded-sm text-xs text-transparent",
-        day_outside:
-          "text-transparent bg-transparent border border-transparent",
-        day_today: "border border-black text-transparent",
+        ...classNames,
+        root: cn("w-auto", classNames?.root),
+        nav: cn("hidden", classNames?.nav),
+        caption: cn("text-xs", classNames?.caption),
+        caption_label: cn("font-normal", classNames?.caption_label),
+        month: cn("ml-0 w-fit", classNames?.month),
+        month_caption: cn("h-fit px-0", classNames?.month_caption),
+        months: cn("w-fit gap-0", classNames?.months),
+        month_grid: cn("w-fit", classNames?.month_grid),
+        weeks: cn("flex w-fit", classNames?.weeks),
+        week: cn(
+          "mt-0 flex flex-col select-none data-[duplicated-previous-month=true]:hidden",
+          classNames?.week
+        ),
+        day: cn(
+          "m-(--day-margin) size-(--day-size) rounded-sm border border-border/20 bg-muted/50 text-xs text-transparent",
+          classNames?.day
+        ),
+        day_outside: cn(
+          "border border-transparent bg-transparent text-transparent",
+          classNames?.day_outside
+        ),
+        day_today: cn(
+          "border border-black text-transparent",
+          classNames?.day_today
+        ),
       }}
       modifiers={heatmapModify()}
       modifiersClassNames={{
@@ -206,6 +235,10 @@ function CustomWeek({ week, data }: CustomWeekProps) {
           data.find(
             (item) => item.date.toDateString() === day.date.toDateString()
           )?.count ?? "No"
+        const level =
+          data.find(
+            (item) => item.date.toDateString() === day.date.toDateString()
+          )?.level ?? 0
 
         return (
           <Tooltip key={`${day.isoDate}_${day.displayMonthId}`}>
@@ -217,6 +250,7 @@ function CustomWeek({ week, data }: CustomWeekProps) {
                   className={dayClassName}
                   style={styles?.day}
                   role="gridcell"
+                  data-level={level.toString()}
                 >
                   {formatters.formatDay(
                     day.date,
@@ -236,16 +270,57 @@ function CustomWeek({ week, data }: CustomWeekProps) {
   )
 }
 
-const CalendarHeatmapLegend = () => {
+const CalendarHeatmapLegend = ({
+  className,
+  ...props
+}: React.ComponentProps<"div">) => {
+  const { _classNames } = useCalendarHeatmap()
+
   return (
-    <div className="flex w-full justify-end space-x-2 text-sm text-muted-foreground">
+    <div
+      className={cn(
+        "flex w-full justify-end space-x-2 text-sm text-muted-foreground",
+        className
+      )}
+      {...props}
+    >
       <span>less</span>
       <div className="flex items-center space-x-1">
-        <div className="h-(--box-size) w-(--box-size) rounded-sm bg-(--level-0)" />
-        <div className="h-(--box-size) w-(--box-size) rounded-sm bg-(--level-1)" />
-        <div className="h-(--box-size) w-(--box-size) rounded-sm bg-(--level-2)" />
-        <div className="h-(--box-size) w-(--box-size) rounded-sm bg-(--level-3)" />
-        <div className="h-(--box-size) w-(--box-size) rounded-sm bg-(--level-4)" />
+        <div
+          data-level="0"
+          className={cn(
+            "size-(--day-size) rounded-sm bg-(--level-0)",
+            _classNames.day
+          )}
+        />
+        <div
+          data-level="1"
+          className={cn(
+            "size-(--day-size) rounded-sm bg-(--level-1)",
+            _classNames.day
+          )}
+        />
+        <div
+          data-level="2"
+          className={cn(
+            "size-(--day-size) rounded-sm bg-(--level-2)",
+            _classNames.day
+          )}
+        />
+        <div
+          data-level="3"
+          className={cn(
+            "size-(--day-size) rounded-sm bg-(--level-3)",
+            _classNames.day
+          )}
+        />
+        <div
+          data-level="4"
+          className={cn(
+            "size-(--day-size) rounded-sm bg-(--level-4)",
+            _classNames.day
+          )}
+        />
       </div>
       <span>more</span>
     </div>
