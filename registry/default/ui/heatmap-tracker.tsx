@@ -93,7 +93,7 @@ const HeatmapTrackerContainer = ({
   )
 }
 
-export interface CalendarHeatmapData {
+interface HeatmapTrackerData {
   date: Date
   count: number
   level: number
@@ -103,7 +103,7 @@ const HeatmapTracker = ({
   data,
   locale = enUS,
 }: {
-  data: Array<CalendarHeatmapData>
+  data: Array<HeatmapTrackerData>
   locale?: Locale
 }) => {
   const formatCaption = (date: Date) =>
@@ -140,7 +140,7 @@ const HeatmapTracker = ({
   )
 
   const dataMap = React.useMemo(() => {
-    const map = new Map<number, CalendarHeatmapData>()
+    const map = new Map<number, HeatmapTrackerData>()
     for (const item of data) {
       map.set(normalizeDate(item.date), item)
     }
@@ -254,7 +254,7 @@ function CustomDay({
   data,
   firstDay,
   ...props
-}: DayProps & { data: Map<number, CalendarHeatmapData>; firstDay: Date }) {
+}: DayProps & { data: Map<number, HeatmapTrackerData>; firstDay: Date }) {
   const { classNames, styles, formatters, dayPickerProps } = useDayPicker()
   const { normalizeDate } = useHeatmapTracker()
 
@@ -342,4 +342,9 @@ const HeatmapTrackerLegend = ({
   )
 }
 
-export { HeatmapTracker, HeatmapTrackerContainer, HeatmapTrackerLegend }
+export {
+  HeatmapTracker,
+  HeatmapTrackerContainer,
+  HeatmapTrackerLegend,
+  type HeatmapTrackerData,
+}

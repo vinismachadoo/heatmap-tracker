@@ -1,4 +1,4 @@
-import { CalendarHeatmapData } from "@/registry/default/ui/heatmap-tracker"
+import { HeatmapTrackerData } from "@/registry/default/ui/heatmap-tracker"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -14,7 +14,7 @@ function seededRandom(seed: number) {
   }
 }
 
-export const generateContributions = (): CalendarHeatmapData[] => {
+export const generateContributions = (): HeatmapTrackerData[] => {
   const end = new Date()
   const data: { date: Date; count: number }[] = []
   const rand = seededRandom(42)
@@ -58,7 +58,7 @@ export const generateContributions = (): CalendarHeatmapData[] => {
 
 export const generateIntensities = (
   data: { date: Date; count: number }[]
-): CalendarHeatmapData[] => {
+): HeatmapTrackerData[] => {
   const dataCountMax = Math.max(...data.map((item) => item.count))
   const dataCountMin = Math.min(...data.map((item) => item.count))
 
