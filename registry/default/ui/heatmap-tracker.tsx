@@ -39,7 +39,7 @@ export const useCalendarHeatmap = () => {
   return context
 }
 
-const CalendarHeatmapContainer = ({
+const HeatmapTrackerContainer = ({
   children,
   className,
   style,
@@ -99,7 +99,7 @@ export interface CalendarHeatmapData {
   level: number
 }
 
-const CalendarHeatmap = ({
+const HeatmapTracker = ({
   data,
   locale = enUS,
 }: {
@@ -301,7 +301,7 @@ function CustomDay({
   )
 }
 
-const CalendarHeatmapLegend = ({
+const HeatmapTrackerLegend = ({
   className,
   ...props
 }: React.ComponentProps<"div">) => {
@@ -342,4 +342,4 @@ const CalendarHeatmapLegend = ({
   )
 }
 
-export { CalendarHeatmap, CalendarHeatmapContainer, CalendarHeatmapLegend }
+export { HeatmapTracker, HeatmapTrackerContainer, HeatmapTrackerLegend }
