@@ -21,19 +21,19 @@ import { enUS, Locale } from "date-fns/locale"
 const DAY_SIZE = "calc(var(--spacing)*4.5)"
 const DAY_MARGIN = "2px"
 
-type CalendarHeatmapContextValue = PropsBase & {
+type HeatmapTrackerContextValue = PropsBase & {
   normalizeDate: (d: Date) => number
 }
 
-const CalendarHeatmapContext = React.createContext<
-  CalendarHeatmapContextValue | undefined
+const HeatmapTrackerContext = React.createContext<
+  HeatmapTrackerContextValue | undefined
 >(undefined)
 
-export const useCalendarHeatmap = () => {
-  const context = React.useContext(CalendarHeatmapContext)
+export const useHeatmapTracker = () => {
+  const context = React.useContext(HeatmapTrackerContext)
   if (!context) {
     throw new Error(
-      "useCalendarHeatmap must be used within a CalendarHeatmapContainer"
+      "useHeatmapTracker must be used within a HeatmapTrackerContainer"
     )
   }
   return context
@@ -55,7 +55,7 @@ const HeatmapTrackerContainer = ({
     new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
 
   return (
-    <CalendarHeatmapContext.Provider
+    <HeatmapTrackerContext.Provider
       value={{
         normalizeDate: normalize,
         ...props,
@@ -89,7 +89,7 @@ const HeatmapTrackerContainer = ({
       >
         {children}
       </div>
-    </CalendarHeatmapContext.Provider>
+    </HeatmapTrackerContext.Provider>
   )
 }
 
@@ -109,7 +109,7 @@ const HeatmapTracker = ({
   const formatCaption = (date: Date) =>
     date.toLocaleString(locale?.code, { month: "short" })
 
-  const { normalizeDate, classNames, components } = useCalendarHeatmap()
+  const { normalizeDate, classNames, components } = useHeatmapTracker()
 
   const levelModifiers = React.useMemo(
     () =>
@@ -256,7 +256,7 @@ function CustomDay({
   ...props
 }: DayProps & { data: Map<number, CalendarHeatmapData>; firstDay: Date }) {
   const { classNames, styles, formatters, dayPickerProps } = useDayPicker()
-  const { normalizeDate } = useCalendarHeatmap()
+  const { normalizeDate } = useHeatmapTracker()
 
   const modifierClassNames = dayPickerProps.modifiersClassNames ?? {}
   const allClassNames: Record<string, string> = {
@@ -305,7 +305,7 @@ const HeatmapTrackerLegend = ({
   className,
   ...props
 }: React.ComponentProps<"div">) => {
-  const { classNames } = useCalendarHeatmap()
+  const { classNames } = useHeatmapTracker()
 
   const LEVEL_CLASSES = [
     "bg-(--level-0)",
