@@ -1,0 +1,19 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "heatmap-tracker",
+  "homepage": "https://heatmap-tracker.ovinisanches.com",
+  "items": [
+    {
+      "name": "heatmap-tracker",
+      "type": "registry:ui",
+      "registryDependencies": ["https://ovinisanches.com/r/calendar.json", "https://ovinisanches.com/r/tooltip.json"],
+      "dependencies": ["react-day-picker", "date-fns"],
+      "files": [
+        {
+          "path": "registry/default/ui/heatmap-tracker.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    }
+  ]
+}

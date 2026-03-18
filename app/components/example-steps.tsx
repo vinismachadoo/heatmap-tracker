@@ -4,7 +4,7 @@ import {
   CalendarHeatmap,
   CalendarHeatmapContainer,
   CalendarHeatmapLegend,
-} from "@/components/heatmap-tracker"
+} from "@/registry/default/ui/heatmap-tracker"
 
 const ExampleSteps = ({
   data,
@@ -25,13 +25,11 @@ const ExampleSteps = ({
         "var(--color-blue-400)",
         "var(--color-blue-200)",
       ]}
+      classNames={{
+        day: "rounded-full",
+      }}
     >
-      <CalendarHeatmap
-        data={data}
-        classNames={{
-          day: "rounded-full",
-        }}
-      />
+      <CalendarHeatmap data={data} />
       <CalendarHeatmapLegend />
     </CalendarHeatmapContainer>
   )

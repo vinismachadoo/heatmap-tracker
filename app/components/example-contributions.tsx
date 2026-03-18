@@ -4,19 +4,18 @@ import {
   CalendarHeatmap,
   CalendarHeatmapContainer,
   CalendarHeatmapLegend,
-} from "@/components/heatmap-tracker"
+} from "@/registry/default/ui/heatmap-tracker"
 
 const ExampleContributions = ({
   data,
 }: React.ComponentProps<typeof CalendarHeatmap>) => {
   return (
-    <CalendarHeatmapContainer>
-      <CalendarHeatmap
-        data={data}
-        classNames={{
-          day: "rounded-none",
-        }}
-      />
+    <CalendarHeatmapContainer
+      classNames={{
+        day: "rounded-none",
+      }}
+    >
+      <CalendarHeatmap data={data} />
       <CalendarHeatmapLegend />
     </CalendarHeatmapContainer>
   )

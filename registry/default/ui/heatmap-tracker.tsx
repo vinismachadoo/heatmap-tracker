@@ -1,5 +1,3 @@
-// Original code: https://github.com/sp-yduck/shadcn-ui-calendar-heatmap/tree/main
-
 "use client"
 
 import { cn } from "@/lib/utils"
@@ -14,16 +12,17 @@ import {
   Day,
   useDayPicker,
   WeekNumber,
-  type CalendarWeek,
+  type WeekProps,
+  type DayProps,
+  type PropsBase,
 } from "react-day-picker"
-import { enUS } from "date-fns/locale"
+import { enUS, Locale } from "date-fns/locale"
 
 const DAY_SIZE = "calc(var(--spacing)*4.5)"
 const DAY_MARGIN = "2px"
 
-type CalendarHeatmapContextValue = {
-  _classNames: Record<string, string>
-  _setClassNames: React.Dispatch<React.SetStateAction<Record<string, string>>>
+type CalendarHeatmapContextValue = PropsBase & {
+  normalizeDate: (d: Date) => number
 }
 
 const CalendarHeatmapContext = React.createContext<
@@ -43,19 +42,23 @@ export const useCalendarHeatmap = () => {
 const CalendarHeatmapContainer = ({
   children,
   className,
+  style,
   lightColors = [],
   darkColors = [],
   ...props
-}: React.ComponentProps<"div"> & {
+}: React.ComponentProps<typeof Calendar> & {
+  children: React.ReactNode
   lightColors?: string[]
   darkColors?: string[]
 }) => {
-  const [classNames, setClassNames] = React.useState<Record<string, string>>({})
+  const normalize = (d: Date) =>
+    new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime()
+
   return (
     <CalendarHeatmapContext.Provider
       value={{
-        _classNames: classNames,
-        _setClassNames: setClassNames,
+        normalizeDate: normalize,
+        ...props,
       }}
     >
       <div
@@ -73,6 +76,7 @@ const CalendarHeatmapContainer = ({
             "--level-4-dark": darkColors[4] ?? "var(--color-lime-200)",
             "--day-size": DAY_SIZE,
             "--day-margin": DAY_MARGIN,
+            ...style,
           } as React.CSSProperties
         }
         className={cn(
@@ -81,7 +85,7 @@ const CalendarHeatmapContainer = ({
           "dark:[--level-0:var(--level-0-dark)] dark:[--level-1:var(--level-1-dark)] dark:[--level-2:var(--level-2-dark)] dark:[--level-3:var(--level-3-dark)] dark:[--level-4:var(--level-4-dark)]",
           className
         )}
-        {...props}
+        // {...props}
       >
         {children}
       </div>
@@ -98,61 +102,69 @@ export interface CalendarHeatmapData {
 const CalendarHeatmap = ({
   data,
   locale = enUS,
-  components,
-  classNames,
-  ...props
-}: React.ComponentProps<typeof Calendar> & {
+}: {
   data: Array<CalendarHeatmapData>
+  locale?: Locale
 }) => {
   const formatCaption = (date: Date) =>
     date.toLocaleString(locale?.code, { month: "short" })
-  const elevenMonthAgo = new Date(
-    new Date().setMonth(new Date().getMonth() - 12)
+
+  const { normalizeDate, classNames, components } = useCalendarHeatmap()
+
+  const levelModifiers = React.useMemo(
+    () =>
+      data.reduce(
+        (acc, item) => {
+          if (item.level === 0) {
+            acc.zero.push(item.date)
+          } else if (item.level === 1) {
+            acc.one.push(item.date)
+          } else if (item.level === 2) {
+            acc.two.push(item.date)
+          } else if (item.level === 3) {
+            acc.three.push(item.date)
+          } else if (item.level === 4) {
+            acc.four.push(item.date)
+          }
+          return acc
+        },
+        {
+          zero: [] as Date[],
+          one: [] as Date[],
+          two: [] as Date[],
+          three: [] as Date[],
+          four: [] as Date[],
+        }
+      ),
+    [data]
   )
 
-  const heatmapModify = () => {
-    const zero: Date[] = []
-    const one: Date[] = []
-    const two: Date[] = []
-    const three: Date[] = []
-    const four: Date[] = []
+  const dataMap = React.useMemo(() => {
+    const map = new Map<number, CalendarHeatmapData>()
     for (const item of data) {
-      if (item.level === 0) {
-        zero.push(item.date)
-      } else if (item.level === 1) {
-        one.push(item.date)
-      } else if (item.level === 2) {
-        two.push(item.date)
-      } else if (item.level === 3) {
-        three.push(item.date)
-      } else if (item.level === 4) {
-        four.push(item.date)
-      }
+      map.set(normalizeDate(item.date), item)
     }
+    return map
+  }, [data, normalizeDate])
 
-    return {
-      zero: zero,
-      one: one,
-      two: two,
-      three: three,
-      four: four,
-    }
-  }
-
-  const { _setClassNames } = useCalendarHeatmap()
-
-  React.useEffect(() => {
-    _setClassNames({
-      ...classNames,
-    })
+  const oneYearAgoStartOfWeek = React.useMemo(() => {
+    const d = new Date()
+    d.setFullYear(d.getFullYear() - 1)
+    d.setDate(d.getDate() - d.getDay())
+    d.setHours(0, 0, 0, 0)
+    return d
   }, [])
+
+  const twelveMonthAgo = new Date(
+    new Date().setMonth(new Date().getMonth() - 12)
+  )
 
   return (
     <Calendar
       formatters={{ formatCaption }}
       locale={locale}
       numberOfMonths={13}
-      defaultMonth={elevenMonthAgo}
+      defaultMonth={twelveMonthAgo}
       hideWeekdays
       fixedWeeks
       className="w-fit items-center justify-center p-0"
@@ -182,7 +194,7 @@ const CalendarHeatmap = ({
           classNames?.today
         ),
       }}
-      modifiers={heatmapModify()}
+      modifiers={levelModifiers}
       modifiersClassNames={{
         zero: "bg-(--level-0)",
         one: "bg-(--level-1)",
@@ -191,30 +203,23 @@ const CalendarHeatmap = ({
         four: "bg-(--level-4)",
       }}
       components={{
-        Week: (props) => <CustomWeek week={props.week} data={data} />,
+        Week: ({ ...props }) => <CustomWeek {...props} />,
+        Day: ({ ...props }) => (
+          <CustomDay
+            data={dataMap}
+            firstDay={oneYearAgoStartOfWeek}
+            {...props}
+          />
+        ),
         ...components,
       }}
-      {...props}
     />
   )
 }
 
-interface CustomWeekProps {
-  week: CalendarWeek
-  data: CalendarHeatmapData[]
-}
+function CustomWeek({ week, children, ...props }: WeekProps) {
+  const { components, classNames, styles, dayPickerProps } = useDayPicker()
 
-function CustomWeek({ week, data }: CustomWeekProps) {
-  const {
-    getModifiers,
-    components,
-    classNames,
-    styles,
-    formatters,
-    dayPickerProps,
-  } = useDayPicker()
-
-  const DayComponent = components?.Day ?? Day
   const WeekNumberComponent = components?.WeekNumber ?? WeekNumber
   const showWeekNumber = dayPickerProps.showWeekNumber ?? false
 
@@ -223,18 +228,13 @@ function CustomWeek({ week, data }: CustomWeekProps) {
   const monthOfFirstDay = week.days[0]?.date.getMonth()
   const thisMonth = displayMonth?.getMonth()
 
-  const modifierClassNames = dayPickerProps.modifiersClassNames ?? {}
-  const allClassNames: Record<string, string> = {
-    ...classNames,
-    ...modifierClassNames,
-  }
-
   return (
     <tr
       data-duplicated-next-month={thisMonth !== monthOfLastDay}
       data-duplicated-previous-month={thisMonth !== monthOfFirstDay}
       className={classNames?.week}
       style={styles?.week}
+      {...props}
     >
       {showWeekNumber && (
         <WeekNumberComponent
@@ -243,62 +243,61 @@ function CustomWeek({ week, data }: CustomWeekProps) {
           style={styles?.week_number}
         />
       )}
-      {week.days.map((day) => {
-        const modifiers = getModifiers(day)
-        const modifierClasses = Object.entries(modifiers)
-          .filter(([, v]) => v)
-          .map(([k]) => allClassNames[k])
-          .filter(Boolean)
-          .join(" ")
-        const dayClassName = cn(classNames?.day, modifierClasses)
-        const count =
-          data.find(
-            (item) => item.date.toDateString() === day.date.toDateString()
-          )?.count ?? "No"
-        const level =
-          data.find(
-            (item) => item.date.toDateString() === day.date.toDateString()
-          )?.level ?? 0
-
-        // Get the start of the week of the date exactly one year ago from today at 00:00:00:00
-        const oneYearAgoStartOfWeek = new Date(
-          new Date().setFullYear(new Date().getFullYear() - 1)
-        )
-        oneYearAgoStartOfWeek.setDate(
-          oneYearAgoStartOfWeek.getDate() - oneYearAgoStartOfWeek.getDay()
-        )
-        oneYearAgoStartOfWeek.setHours(0, 0, 0, 0)
-
-        return (
-          <Tooltip key={`${day.isoDate}_${day.displayMonthId}`}>
-            <TooltipTrigger
-              render={
-                <DayComponent
-                  day={day}
-                  modifiers={modifiers}
-                  className={dayClassName}
-                  style={styles?.day}
-                  role="gridcell"
-                  data-level={level.toString()}
-                  data-hidden={
-                    day.date > new Date() || day.date < oneYearAgoStartOfWeek
-                  }
-                >
-                  {formatters.formatDay(
-                    day.date,
-                    day.dateLib.options,
-                    day.dateLib
-                  )}
-                </DayComponent>
-              }
-            />
-            <TooltipContent>
-              {`${count} activities on ${day.date.toDateString()}`}
-            </TooltipContent>
-          </Tooltip>
-        )
-      })}
+      {children}
     </tr>
+  )
+}
+
+function CustomDay({
+  day,
+  modifiers,
+  data,
+  firstDay,
+  ...props
+}: DayProps & { data: Map<number, CalendarHeatmapData>; firstDay: Date }) {
+  const { classNames, styles, formatters, dayPickerProps } = useDayPicker()
+  const { normalizeDate } = useCalendarHeatmap()
+
+  const modifierClassNames = dayPickerProps.modifiersClassNames ?? {}
+  const allClassNames: Record<string, string> = {
+    ...classNames,
+    ...modifierClassNames,
+  }
+
+  const modifierClasses = Object.entries(modifiers)
+    .filter(([, v]) => v)
+    .map(([k]) => allClassNames[k])
+    .filter(Boolean)
+    .join(" ")
+  const dayClassName = cn(classNames?.day, modifierClasses)
+
+  const item = data.get(normalizeDate(day.date))
+  const count = item?.count ?? "No"
+  const level = item?.level ?? 0
+
+  return (
+    <Tooltip key={`${day.isoDate}_${day.displayMonthId}`}>
+      <TooltipTrigger
+        render={
+          <Day
+            {...props}
+            day={day}
+            modifiers={modifiers}
+            className={dayClassName}
+            style={styles?.day}
+            role="gridcell"
+            data-level={level.toString()}
+            // using modifiers don't work cause dates don't exist in data
+            data-hidden={day.date > new Date() || day.date < firstDay}
+          >
+            {formatters.formatDay(day.date, day.dateLib.options, day.dateLib)}
+          </Day>
+        }
+      />
+      <TooltipContent>
+        {`${count} activities on ${day.date.toDateString()}`}
+      </TooltipContent>
+    </Tooltip>
   )
 }
 
@@ -306,7 +305,15 @@ const CalendarHeatmapLegend = ({
   className,
   ...props
 }: React.ComponentProps<"div">) => {
-  const { _classNames } = useCalendarHeatmap()
+  const { classNames } = useCalendarHeatmap()
+
+  const LEVEL_CLASSES = [
+    "bg-(--level-0)",
+    "bg-(--level-1)",
+    "bg-(--level-2)",
+    "bg-(--level-3)",
+    "bg-(--level-4)",
+  ]
 
   return (
     <div
@@ -318,41 +325,17 @@ const CalendarHeatmapLegend = ({
     >
       <span>less</span>
       <div className="flex items-center space-x-1">
-        <div
-          data-level="0"
-          className={cn(
-            "size-(--day-size) rounded-sm bg-(--level-0)",
-            _classNames.day
-          )}
-        />
-        <div
-          data-level="1"
-          className={cn(
-            "size-(--day-size) rounded-sm bg-(--level-1)",
-            _classNames.day
-          )}
-        />
-        <div
-          data-level="2"
-          className={cn(
-            "size-(--day-size) rounded-sm bg-(--level-2)",
-            _classNames.day
-          )}
-        />
-        <div
-          data-level="3"
-          className={cn(
-            "size-(--day-size) rounded-sm bg-(--level-3)",
-            _classNames.day
-          )}
-        />
-        <div
-          data-level="4"
-          className={cn(
-            "size-(--day-size) rounded-sm bg-(--level-4)",
-            _classNames.day
-          )}
-        />
+        {LEVEL_CLASSES.map((levelClassName, index) => (
+          <div
+            key={index}
+            data-level={index.toString()}
+            className={cn(
+              "size-(--day-size) rounded-sm",
+              levelClassName,
+              classNames?.day
+            )}
+          />
+        ))}
       </div>
       <span>more</span>
     </div>

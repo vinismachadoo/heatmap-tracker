@@ -1,4 +1,4 @@
-import { CalendarHeatmapData } from "@/components/heatmap-tracker"
+import { CalendarHeatmapData } from "@/registry/default/ui/heatmap-tracker"
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
