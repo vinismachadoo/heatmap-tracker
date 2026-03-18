@@ -40,9 +40,11 @@ const ModeToggle = ({
         <Moon className="block size-4 dark:hidden" />
         <span className="sr-only">Toggle theme</span>
       </TooltipTrigger>
-      <TooltipContent className={cn(shortcut && "pe-2")}>
-        Toggle theme
-        {shortcut && <Kbd>{shortcut}</Kbd>}
+      <TooltipContent
+        className={cn("flex items-center gap-2", shortcut && "pe-2")}
+      >
+        Toggle Mode
+        {shortcut && <Kbd className="uppercase">{shortcut}</Kbd>}
       </TooltipContent>
     </Tooltip>
   )

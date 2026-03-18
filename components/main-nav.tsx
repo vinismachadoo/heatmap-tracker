@@ -2,9 +2,14 @@
 
 import ModeToggle from "@/components/mode-toggle"
 import { Grip } from "lucide-react"
+import { useTheme } from "next-themes"
 import Link from "next/link"
+import { useHotkeys } from "react-hotkeys-hook"
 
 const MainNav = () => {
+  const { setTheme, resolvedTheme } = useTheme()
+  useHotkeys("d", () => setTheme(resolvedTheme === "dark" ? "light" : "dark"))
+
   return (
     <nav className="flex h-full w-full items-center justify-between gap-x-2 border-b px-20 **:data-active:bg-muted">
       <div className="flex items-center gap-x-2">
@@ -16,7 +21,7 @@ const MainNav = () => {
       </div>
 
       <div className="flex items-center gap-x-2">
-        <ModeToggle />
+        <ModeToggle shortcut="d" />
       </div>
     </nav>
   )
