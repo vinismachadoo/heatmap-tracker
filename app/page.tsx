@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn, generateRandomDatas } from "@/lib/utils"
 
 const INSTALL_COMMAND =
-  "npx shadcn@latest add https://heatmap-tracker.ovinisanches.com/r/heatmap-tracker.json"
+  "npx shadcn@latest add https://ovinisanches.com/r/heatmap-tracker.json"
 
 export default function Page() {
   const randomData = generateRandomDatas()
@@ -52,7 +52,7 @@ export default function Page() {
         <CopyInstallButton command={INSTALL_COMMAND} />
       </div>
 
-      <Tabs className="w-300">
+      <Tabs className="w-300" defaultValue="contributions">
         <TabsList className="w-full">
           <TabsTrigger value="contributions" className="gap-x-2">
             <div className="flex items-center gap-x-0.5">
@@ -108,8 +108,17 @@ export default function Page() {
           className="flex flex-col items-center justify-center gap-y-4 pt-6"
           keepMounted
         >
-          <ExampleContributions data={randomData} />
-          <ComponentSource name="github-contributions" />
+          {!randomData.length ? (
+            <div className="flex flex-col items-center justify-center gap-y-4">
+              <p>No data available</p>
+              <p>Generating Data</p>
+            </div>
+          ) : (
+            <>
+              <ExampleContributions data={randomData} />
+              <ComponentSource name="github-contributions" />
+            </>
+          )}
         </TabsContent>
         <TabsContent
           value="swimming"

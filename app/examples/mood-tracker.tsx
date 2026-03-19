@@ -1,7 +1,7 @@
 "use client"
 
 import { cn } from "@/lib/utils"
-import { HeatmapTracker } from "@/registry/default/ui/heatmap-tracker"
+import { HeatmapTracker } from "@/components/ui/heatmap-tracker"
 
 const ExampleMood = ({ data }: React.ComponentProps<typeof HeatmapTracker>) => {
   return (

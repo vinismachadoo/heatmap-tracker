@@ -156,7 +156,7 @@ const HeatmapTracker = ({
         defaultMonth={twelveMonthAgo}
         hideWeekdays
         fixedWeeks
-        className="w-fit items-center justify-center p-0"
+        className="w-fit items-center justify-center bg-transparent p-0"
         classNames={{
           ...classNames,
           root: cn("w-auto", classNames?.root),

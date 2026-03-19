@@ -1,6 +1,6 @@
 "use client"
 
-import { HeatmapTracker } from "@/registry/default/ui/heatmap-tracker"
+import { HeatmapTracker } from "@/components/ui/heatmap-tracker"
 
 const ExampleSwimming = ({
   data,
