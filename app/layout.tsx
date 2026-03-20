@@ -5,6 +5,7 @@ import { Metadata } from "next"
 import { Geist, Geist_Mono, Inter } from "next/font/google"
 import "./globals.css"
 import MainNav from "@/components/main-nav"
+import ogImage from "@/app/opengraph-image.png"
 
 const inter = Inter({
   variable: "--font-inter",
@@ -37,6 +38,36 @@ export const metadata: Metadata = {
         media: "(prefers-color-scheme: dark)",
       },
     ],
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: `${process.env.NEXT_PUBLIC_URL}`,
+    title: "Heatmap Tracker",
+    description: "A composable heatmap tracker component",
+    siteName: "Heatmap Tracker",
+    images: [
+      {
+        url: ogImage.src,
+        width: ogImage.width,
+        height: ogImage.height,
+        alt: "Heatmap Tracker",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Heatmap Tracker",
+    description: "A composable heatmap tracker component",
+    images: [
+      {
+        url: ogImage.src,
+        width: ogImage.width,
+        height: ogImage.height,
+        alt: "Heatmap Tracker",
+      },
+    ],
+    creator: "@ovinisanches",
   },
 }
 
