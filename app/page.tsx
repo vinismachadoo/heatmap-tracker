@@ -108,17 +108,8 @@ export default function Page() {
           className="flex flex-col items-center justify-center gap-y-4 pt-6"
           keepMounted
         >
-          {!randomData.length ? (
-            <div className="flex flex-col items-center justify-center gap-y-4">
-              <p>No data available</p>
-              <p>Generating Data</p>
-            </div>
-          ) : (
-            <>
-              <ExampleContributions data={randomData} />
-              <ComponentSource name="github-contributions" />
-            </>
-          )}
+          <ExampleContributions data={randomData} />
+          <ComponentSource name="github-contributions" />
         </TabsContent>
         <TabsContent
           value="swimming"
